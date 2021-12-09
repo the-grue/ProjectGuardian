@@ -1,0 +1,15 @@
+/gnu-efi
+
+*.o
+
+*.img
+
+*.vmdk
+
+*.so
+
+*.ref
+
+*.elf
+
+*.fd
