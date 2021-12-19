@@ -34,7 +34,7 @@ buildfloppy: buildboot buildkernel
 
 vmdk: buildfloppy
 	@ echo Building vmdk image...
-	rm ProjectGuardian.vmdk
+	rm -rf ProjectGuardian.vmdk
 	vboxmanage internalcommands createrawvmdk -filename ProjectGuardian.vmdk -rawdisk ProjectGuardian.img
 
 clean:
