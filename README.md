@@ -2,7 +2,7 @@
 
 Required filesets for Ubuntu 20.04:
 
-  sudo apt-get install build-essential git gnu-efi ovmf qemu-system-x86
+  sudo apt-get install build-essential git gnu-efi ovmf qemu-system-x86 mtools
 
 Pull down the repo and then copy the OVMF files from /usr/share/OVMF to efi:
 
