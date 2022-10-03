@@ -1,6 +1,6 @@
 # ProjectGuardian
 
-Required filesets for Ubuntu 20.04:
+Required filesets for Ubuntu 20.04/22.04:
 
   sudo apt-get install build-essential git gnu-efi ovmf qemu-system-x86 mtools
 
