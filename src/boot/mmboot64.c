@@ -1,5 +1,6 @@
 #include <efi.h>
 #include <efilib.h>
+#include <string.h>
 
 EFI_FILE_PROTOCOL* OpenFile(EFI_FILE_PROTOCOL* Volume, CHAR16* Path, EFI_HANDLE ImageHandle)
 {
@@ -130,6 +131,8 @@ EFI_STATUS EFIAPI efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable
 		Print(L"Failed to load MMKernel\n");
 	else
 		Print(L"MMKernel loaded...\n");
+
+	Print(L"%d, %d, %d\n", memcmp("test", "TEST", 4), memcmp("TEST", "test", 4), memcmp("TEST", "TEST", 4));
 
 	return EFI_SUCCESS;
 }

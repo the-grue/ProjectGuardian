@@ -2,23 +2,32 @@ LIBDIR = /usr/lib
 SRCDIR = src
 BINDIR = bin
 EFIDIR = efi
+LOGDIR = log
 BOOTDIR = $(SRCDIR)/boot
 KERNDIR = $(SRCDIR)/kernel
-STDLIBDIR = $(SRCDIR)/stdlib
+STDLIBDIR = $(SRCDIR)/stdlib/src
 
 LOADERSCRIPT = $(LIBDIR)/elf_x86_64_efi.lds
 STARTUP = $(LIBDIR)/crt0-efi-x86_64.o
 
 CC = gcc
 LD = ld
+AR = ar
 
-CFLAGS = -I/usr/include/efi -I/usr/include/efi/x86_64 -fpic -ffreestanding -fno-stack-protector -fno-stack-check -fshort-wchar -mno-red-zone -maccumulate-outgoing-args
+CFLAGS = -I/usr/include/efi -I/usr/include/efi/x86_64 -Isrc/stdlib/include -fpic -ffreestanding -fno-stack-protector -fno-stack-check -fshort-wchar -mno-red-zone -maccumulate-outgoing-args
+ARFLAGS = rcs
+
+buildstdlib:
+	@ echo Building stdlib...
+	$(CC) $(CFLAGS) -c $(STDLIBDIR)/memcmp.c -o $(STDLIBDIR)/memcmp.o
+	$(AR) $(ARFLAGS) lib/libstd.a $(STDLIBDIR)/memcmp.o
+	rm $(STDLIBDIR)/memcmp.o
 
 buildboot:
 	@ echo Building booter...
 	$(CC) $(CFLAGS) -c $(BOOTDIR)/mmboot64.c -o $(BOOTDIR)/mmboot64.o
 	$(CC) $(CFLAGS) -c $(BOOTDIR)/colors.c -o $(BOOTDIR)/colors.o
-	ld -shared -Bsymbolic -L$(LIBDIR) -T$(LOADERSCRIPT) $(STARTUP) $(BOOTDIR)/colors.o $(BOOTDIR)/mmboot64.o -lgnuefi -lefi -o $(BINDIR)/mmboot64.so
+	ld -M -shared -Bsymbolic -L$(LIBDIR) -Llib -T$(LOADERSCRIPT) $(STARTUP) $(BOOTDIR)/colors.o $(BOOTDIR)/mmboot64.o -lstd -lgnuefi -lefi -o $(BINDIR)/mmboot64.so > $(LOGDIR)/linkmap.out
 	objcopy -j .text -j .sdata -j .data -j .dynamic -j .dynsym  -j .rel -j .rela -j .rel.* -j .rela.* -j .reloc --target efi-app-x86_64 --subsystem=10 $(BINDIR)/mmboot64.so $(BINDIR)/mmboot64.efi
 	rm $(BOOTDIR)/mmboot64.o $(BINDIR)/mmboot64.so
 	rm $(BOOTDIR)/colors.o
@@ -27,7 +36,7 @@ buildkernel:
 	@ echo Building kernel...
 	touch $(BINDIR)/mmurtl64.elf
 
-buildfloppy: buildboot buildkernel
+buildfloppy: buildstdlib buildboot buildkernel
 	@ echo Building disk image...
 	dd if=/dev/zero of=ProjectGuardian.img bs=512 count=2880
 	mformat -i ProjectGuardian.img -f 1440 ::
@@ -45,6 +54,8 @@ vmdk: buildfloppy
 clean:
 	@ echo Cleaning up...
 	rm -rf bin/*
+	rm -rf log/*
+	rm -rf lib/*
 	rm -rf ProjectGuardian.img
 
 test: buildfloppy
