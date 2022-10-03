@@ -2,6 +2,9 @@ LIBDIR = /usr/lib
 SRCDIR = src
 BINDIR = bin
 EFIDIR = efi
+BOOTDIR = $(SRCDIR)/boot
+KERNDIR = $(SRCDIR)/kernel
+STDLIBDIR = $(SRCDIR)/stdlib
 
 LOADERSCRIPT = $(LIBDIR)/elf_x86_64_efi.lds
 STARTUP = $(LIBDIR)/crt0-efi-x86_64.o
@@ -13,12 +16,12 @@ CFLAGS = -I/usr/include/efi -I/usr/include/efi/x86_64 -fpic -ffreestanding -fno-
 
 buildboot:
 	@ echo Building booter...
-	$(CC) $(CFLAGS) -c $(SRCDIR)/mmboot64.c -o $(SRCDIR)/mmboot64.o
-	$(CC) $(CFLAGS) -c $(SRCDIR)/colors.c -o $(SRCDIR)/colors.o
-	ld -shared -Bsymbolic -L$(LIBDIR) -T$(LOADERSCRIPT) $(STARTUP) $(SRCDIR)/colors.o $(SRCDIR)/mmboot64.o -lgnuefi -lefi -o $(BINDIR)/mmboot64.so
+	$(CC) $(CFLAGS) -c $(BOOTDIR)/mmboot64.c -o $(BOOTDIR)/mmboot64.o
+	$(CC) $(CFLAGS) -c $(BOOTDIR)/colors.c -o $(BOOTDIR)/colors.o
+	ld -shared -Bsymbolic -L$(LIBDIR) -T$(LOADERSCRIPT) $(STARTUP) $(BOOTDIR)/colors.o $(BOOTDIR)/mmboot64.o -lgnuefi -lefi -o $(BINDIR)/mmboot64.so
 	objcopy -j .text -j .sdata -j .data -j .dynamic -j .dynsym  -j .rel -j .rela -j .rel.* -j .rela.* -j .reloc --target efi-app-x86_64 --subsystem=10 $(BINDIR)/mmboot64.so $(BINDIR)/mmboot64.efi
-	rm $(SRCDIR)/mmboot64.o $(BINDIR)/mmboot64.so
-	rm $(SRCDIR)/colors.o
+	rm $(BOOTDIR)/mmboot64.o $(BINDIR)/mmboot64.so
+	rm $(BOOTDIR)/colors.o
 
 buildkernel:
 	@ echo Building kernel...
