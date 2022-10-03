@@ -1,6 +1,28 @@
 #include <efi.h>
 #include <efilib.h>
 
+EFI_FILE_PROTOCOL* OpenFile(EFI_FILE_PROTOCOL* Volume, CHAR16* Path, EFI_HANDLE ImageHandle)
+{
+	EFI_FILE_PROTOCOL* LoadFile;
+	EFI_LOADED_IMAGE_PROTOCOL* LoadImage;
+	EFI_SIMPLE_FILE_SYSTEM_PROTOCOL* FileSystem;
+	EFI_STATUS Status = EFI_SUCCESS;
+
+	uefi_call_wrapper(BS->HandleProtocol, 3, ImageHandle, &gEfiLoadedImageProtocolGuid, (void**) &LoadImage);
+
+	uefi_call_wrapper(BS->HandleProtocol, 3, LoadImage->DeviceHandle, &gEfiSimpleFileSystemProtocolGuid, (void**) &FileSystem);
+
+	if(Volume == NULL)
+		uefi_call_wrapper(FileSystem->OpenVolume, 2, FileSystem, &Volume);
+
+	Status = uefi_call_wrapper(Volume->Open, 5, Volume, &LoadFile, Path, EFI_FILE_MODE_READ, EFI_FILE_READ_ONLY);
+
+	if(Status != EFI_SUCCESS)
+		return NULL;
+
+	return LoadFile;
+}
+
 EFI_STATUS EFIAPI efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable)
 {
 	extern uint32_t colors[];
@@ -101,6 +123,13 @@ EFI_STATUS EFIAPI efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable
 				*((uint32_t*)(gop->Mode->FrameBufferBase + (4 * gop->Mode->Info->PixelsPerScanLine) + 4 * gop->Mode->Info->PixelsPerScanLine * y + 4 * (x+z))) = colors[x/4];
 
 	Print(L"Booting MMURTL-64\n");
+
+	EFI_FILE_PROTOCOL* MMKernel = OpenFile(NULL, L"mmurtl64.elf", ImageHandle);
+
+	if(MMKernel == NULL)
+		Print(L"Failed to load MMKernel\n");
+	else
+		Print(L"MMKernel loaded...\n");
 
 	return EFI_SUCCESS;
 }
