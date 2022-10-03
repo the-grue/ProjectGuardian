@@ -14,9 +14,11 @@ CFLAGS = -I/usr/include/efi -I/usr/include/efi/x86_64 -fpic -ffreestanding -fno-
 buildboot:
 	@ echo Building booter...
 	$(CC) $(CFLAGS) -c $(SRCDIR)/mmboot64.c -o $(SRCDIR)/mmboot64.o
-	ld -shared -Bsymbolic -L$(LIBDIR) -T$(LOADERSCRIPT) $(STARTUP) $(SRCDIR)/mmboot64.o -lgnuefi -lefi -o $(BINDIR)/mmboot64.so
+	$(CC) $(CFLAGS) -c $(SRCDIR)/colors.c -o $(SRCDIR)/colors.o
+	ld -shared -Bsymbolic -L$(LIBDIR) -T$(LOADERSCRIPT) $(STARTUP) $(SRCDIR)/colors.o $(SRCDIR)/mmboot64.o -lgnuefi -lefi -o $(BINDIR)/mmboot64.so
 	objcopy -j .text -j .sdata -j .data -j .dynamic -j .dynsym  -j .rel -j .rela -j .rel.* -j .rela.* -j .reloc --target efi-app-x86_64 --subsystem=10 $(BINDIR)/mmboot64.so $(BINDIR)/mmboot64.efi
 	rm $(SRCDIR)/mmboot64.o $(BINDIR)/mmboot64.so
+	rm $(SRCDIR)/colors.o
 
 buildkernel:
 	@ echo Building kernel...
