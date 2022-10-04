@@ -1,5 +1,6 @@
 #include <efi.h>
 #include <efilib.h>
+#include <elf.h>
 #include <string.h>
 
 EFI_FILE_PROTOCOL* OpenFile(EFI_FILE_PROTOCOL* Volume, CHAR16* Path, EFI_HANDLE ImageHandle)
@@ -132,7 +133,65 @@ EFI_STATUS EFIAPI efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable
 	else
 		Print(L"MMKernel loaded...\n");
 
-	Print(L"%d, %d, %d\n", memcmp("test", "TEST", 4), memcmp("TEST", "test", 4), memcmp("TEST", "TEST", 4));
+	Elf64_Ehdr header;
+	UINTN FileInfoSize;
+	EFI_FILE_INFO* FileInfo;
+
+	uefi_call_wrapper(MMKernel->GetInfo, 4, MMKernel, &gEfiFileInfoGuid, &FileInfoSize, NULL);
+	uefi_call_wrapper(BS->AllocatePool, 3, EfiLoaderData, FileInfoSize, (void**)&FileInfo);
+	uefi_call_wrapper(MMKernel->GetInfo, 4, MMKernel, &gEfiFileInfoGuid, &FileInfoSize, (void**)&FileInfo);
+
+	UINTN size = sizeof(header);
+	uefi_call_wrapper(MMKernel->Read, 3, MMKernel, &size, &header);
+
+	if(
+                memcmp(&header.e_ident[EI_MAG0], ELFMAG, SELFMAG) != 0 ||
+                header.e_ident[EI_CLASS] != ELFCLASS64 ||
+                header.e_ident[EI_DATA] != ELFDATA2LSB ||
+                header.e_type != ET_EXEC ||
+                header.e_machine != EM_X86_64 ||
+                header.e_version != EV_CURRENT
+        )
+	{
+		Print(L"Bad ELF format!\n");
+		return -1;
+	}
+	else
+		Print(L"ELF-64 format kernel!\n");
+
+	Elf64_Phdr* pheaders;
+
+	uefi_call_wrapper(MMKernel->SetPosition, 2, MMKernel, header.e_phoff);
+	size = header.e_phnum * header.e_phentsize;
+	uefi_call_wrapper(BS->AllocatePool, 3, EfiLoaderData, size, (void**)&pheaders);
+	uefi_call_wrapper(MMKernel->Read, 3, MMKernel, &size, pheaders);
+
+	for(Elf64_Phdr* pheader = pheaders;
+	(char*)pheader < (char*)pheaders + header.e_phnum * header.e_phentsize;
+	pheader = (Elf64_Phdr*)((char*)pheader + header.e_phentsize)
+	)
+	{
+		switch(pheader->p_type)
+		{
+			case PT_LOAD:
+			{
+				int pages = (pheader->p_memsz + 0x1000 - 1) / 0x1000;
+				Elf64_Addr segment = pheader->p_paddr;
+				uefi_call_wrapper(BS->AllocatePages, 4, AllocateAddress, EfiLoaderData, pages, &segment);
+
+				uefi_call_wrapper(MMKernel->SetPosition, 2, MMKernel, pheader->p_offset);
+				size = pheader->p_filesz;
+				uefi_call_wrapper(MMKernel->Read, 3, MMKernel, &size, (void*)segment);
+			break;
+			}
+		}
+	}
+
+	Print(L"Starting MMURTL-64...\n");
+
+	int(*KernelStart)() = ((__attribute__((sysv_abi)) int (*)() ) header.e_entry);
+
+	Print(L"%X rules!\n", KernelStart());
 
 	return EFI_SUCCESS;
 }

@@ -9,6 +9,7 @@ STDLIBDIR = $(SRCDIR)/stdlib/src
 
 LOADERSCRIPT = $(LIBDIR)/elf_x86_64_efi.lds
 STARTUP = $(LIBDIR)/crt0-efi-x86_64.o
+KLDSCRIPT = $(KERNDIR)/mmkernel.ld
 
 CC = gcc
 LD = ld
@@ -16,6 +17,8 @@ AR = ar
 
 CFLAGS = -I/usr/include/efi -I/usr/include/efi/x86_64 -Isrc/stdlib/include -fpic -ffreestanding -fno-stack-protector -fno-stack-check -fshort-wchar -mno-red-zone -maccumulate-outgoing-args
 ARFLAGS = rcs
+KCFLAGS = -Isrc/stdlib/include -ffreestanding -fshort-wchar
+KLDFLAGS = -T $(KLDSCRIPT) -static -Bsymbolic -nostdlib
 
 buildstdlib:
 	@ echo Building stdlib...
@@ -34,7 +37,9 @@ buildboot:
 
 buildkernel:
 	@ echo Building kernel...
-	touch $(BINDIR)/mmurtl64.elf
+	$(CC) $(KCFLAGS) -c $(KERNDIR)/mmkernel.c -o $(KERNDIR)/mmkernel.o
+	$(LD) $(KLDFLAGS) -o $(BINDIR)/mmurtl64.elf $(KERNDIR)/mmkernel.o
+	rm $(KERNDIR)/mmkernel.o
 
 buildfloppy: buildstdlib buildboot buildkernel
 	@ echo Building disk image...
