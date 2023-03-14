@@ -2,6 +2,9 @@
 #include <efilib.h>
 #include <elf.h>
 #include <string.h>
+#include <mmkernel.h>
+
+mmKernelTable ktable;
 
 EFI_FILE_PROTOCOL* OpenFile(EFI_FILE_PROTOCOL* Volume, CHAR16* Path, EFI_HANDLE ImageHandle)
 {
@@ -108,6 +111,8 @@ EFI_STATUS EFIAPI efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable
 		return status;
 	}
 	else
+	{
+/*
 		Print(L"Framebuffer address %lx\n\tsize %d\n\twidth %d\n\theight %d\n\tpixelsperline %d\n",
 			gop->Mode->FrameBufferBase,
 			gop->Mode->FrameBufferSize,
@@ -115,6 +120,21 @@ EFI_STATUS EFIAPI efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable
 			gop->Mode->Info->VerticalResolution,
 			gop->Mode->Info->PixelsPerScanLine
 		);
+*/
+		ktable.fb.FBBase = gop->Mode->FrameBufferBase;
+		ktable.fb.FBSize = gop->Mode->FrameBufferSize;
+		ktable.fb.Width = gop->Mode->Info->HorizontalResolution;
+		ktable.fb.Height = gop->Mode->Info->VerticalResolution;
+		ktable.fb.PPScanLine = gop->Mode->Info->PixelsPerScanLine;
+
+		Print(L"Framebuffer address %lx\n\tsize %d\n\twidth %d\n\theight %d\n\tpixelsperline %d\n",
+			ktable.fb.FBBase,
+			ktable.fb.FBSize,
+			ktable.fb.Width,
+			ktable.fb.Height,
+			ktable.fb.PPScanLine
+		);
+	}
 
 	Print(L"Size of UINTN is %d\n", sizeof(UINTN));
 
@@ -189,9 +209,9 @@ EFI_STATUS EFIAPI efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable
 
 	Print(L"Starting MMURTL-64...\n");
 
-	int(*KernelStart)() = ((__attribute__((sysv_abi)) int (*)() ) header.e_entry);
+	int(*KernelStart)(mmKernelTable *) = ((__attribute__((sysv_abi)) int (*)(mmKernelTable *) ) header.e_entry);
 
-	Print(L"%X rules!\n", KernelStart());
+	Print(L"%X rules!\n", KernelStart(&ktable));
 
 	return EFI_SUCCESS;
 }
