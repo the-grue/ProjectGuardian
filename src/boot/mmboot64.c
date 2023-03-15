@@ -8,6 +8,7 @@ mmKernelTable ktable;
 
 EFI_FILE_PROTOCOL* OpenFile(EFI_FILE_PROTOCOL* Volume, CHAR16* Path, EFI_HANDLE ImageHandle)
 {
+	ktable.yarray = NULL;
 	EFI_FILE_PROTOCOL* LoadFile;
 	EFI_LOADED_IMAGE_PROTOCOL* LoadImage;
 	EFI_SIMPLE_FILE_SYSTEM_PROTOCOL* FileSystem;
@@ -112,20 +113,12 @@ EFI_STATUS EFIAPI efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable
 	}
 	else
 	{
-/*
-		Print(L"Framebuffer address %lx\n\tsize %d\n\twidth %d\n\theight %d\n\tpixelsperline %d\n",
-			gop->Mode->FrameBufferBase,
-			gop->Mode->FrameBufferSize,
-			gop->Mode->Info->HorizontalResolution,
-			gop->Mode->Info->VerticalResolution,
-			gop->Mode->Info->PixelsPerScanLine
-		);
-*/
-		ktable.fb.FBBase = gop->Mode->FrameBufferBase;
+		ktable.fb.FBBase = (void*) gop->Mode->FrameBufferBase;
 		ktable.fb.FBSize = gop->Mode->FrameBufferSize;
 		ktable.fb.Width = gop->Mode->Info->HorizontalResolution;
 		ktable.fb.Height = gop->Mode->Info->VerticalResolution;
 		ktable.fb.PPScanLine = gop->Mode->Info->PixelsPerScanLine;
+		ktable.fb.BPP = 4;
 
 		Print(L"Framebuffer address %lx\n\tsize %d\n\twidth %d\n\theight %d\n\tpixelsperline %d\n",
 			ktable.fb.FBBase,
@@ -137,7 +130,6 @@ EFI_STATUS EFIAPI efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable
 	}
 
 	Print(L"Size of UINTN is %d\n", sizeof(UINTN));
-
 
 	for(UINTN x = 0; x < 1024; x+=4)
 		for(UINTN z = 0; z < 4; z++)

@@ -38,8 +38,9 @@ buildboot:
 buildkernel:
 	@ echo Building kernel...
 	$(CC) $(KCFLAGS) -c $(KERNDIR)/mmkernel.c -o $(KERNDIR)/mmkernel.o
-	$(LD) $(KLDFLAGS) -o $(BINDIR)/mmurtl64.elf $(KERNDIR)/mmkernel.o
-	rm $(KERNDIR)/mmkernel.o
+	$(CC) $(KCFLAGS) -c $(BOOTDIR)/colors.c -o $(KERNDIR)/colors.o
+	$(LD) $(KLDFLAGS) -o $(BINDIR)/mmurtl64.elf $(KERNDIR)/mmkernel.o $(KERNDIR)/colors.o
+	rm $(KERNDIR)/mmkernel.o $(KERNDIR)/colors.o
 
 buildfloppy: buildstdlib buildboot buildkernel
 	@ echo Building disk image...

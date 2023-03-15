@@ -12,10 +12,12 @@ typedef struct {
 	unsigned int Width;
 	unsigned int Height;
 	unsigned int PPScanLine;
+	unsigned int BPP;
 } framebuffer;
 
 typedef struct {
 	framebuffer fb;
+	unsigned int *yarray;
 } mmKernelTable;
 
 #endif

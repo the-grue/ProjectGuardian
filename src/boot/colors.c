@@ -1,7 +1,6 @@
-#include <efi.h>
-#include <efilib.h>
+// Default color pallette for IBM PC in 32 bits
 
-uint32_t colors[256] = {
+unsigned int colors[256] = {
 0x00000000,
 0x000000AA,
 0x0000AA00,
