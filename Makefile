@@ -6,6 +6,7 @@ LOGDIR = log
 BOOTDIR = $(SRCDIR)/boot
 KERNDIR = $(SRCDIR)/kernel
 STDLIBDIR = $(SRCDIR)/stdlib/src
+GRLIBDIR = $(SRCDIR)/graphics/src
 
 LOADERSCRIPT = $(LIBDIR)/elf_x86_64_efi.lds
 STARTUP = $(LIBDIR)/crt0-efi-x86_64.o
@@ -15,16 +16,22 @@ CC = gcc
 LD = ld
 AR = ar
 
-CFLAGS = -I/usr/include/efi -I/usr/include/efi/x86_64 -Isrc/stdlib/include -fpic -ffreestanding -fno-stack-protector -fno-stack-check -fshort-wchar -mno-red-zone -maccumulate-outgoing-args
+CFLAGS = -I/usr/include/efi -I/usr/include/efi/x86_64 -Isrc/stdlib/include -Isrc/graphics/include -fpic -ffreestanding -fno-stack-protector -fno-stack-check -fshort-wchar -mno-red-zone -maccumulate-outgoing-args
 ARFLAGS = rcs
-KCFLAGS = -Isrc/stdlib/include -ffreestanding -fshort-wchar
-KLDFLAGS = -T $(KLDSCRIPT) -static -Bsymbolic -nostdlib
+KCFLAGS = -Isrc/stdlib/include -Isrc/graphics/include -ffreestanding -fshort-wchar
+KLDFLAGS = -T $(KLDSCRIPT) -static -Bsymbolic -nostdlib -Llib
 
 buildstdlib:
 	@ echo Building stdlib...
 	$(CC) $(CFLAGS) -c $(STDLIBDIR)/memcmp.c -o $(STDLIBDIR)/memcmp.o
 	$(AR) $(ARFLAGS) lib/libstd.a $(STDLIBDIR)/memcmp.o
 	rm $(STDLIBDIR)/memcmp.o
+
+buildgraphlib:
+	@ echo Building graphics library...
+	$(CC) $(CFLAGS) -c $(GRLIBDIR)/putpixel.c -o $(GRLIBDIR)/putpixel.o
+	$(AR) $(ARFLAGS) lib/libGGI.a $(GRLIBDIR)/putpixel.o
+	rm $(GRLIBDIR)/putpixel.o
 
 buildboot:
 	@ echo Building booter...
@@ -39,10 +46,10 @@ buildkernel:
 	@ echo Building kernel...
 	$(CC) $(KCFLAGS) -c $(KERNDIR)/mmkernel.c -o $(KERNDIR)/mmkernel.o
 	$(CC) $(KCFLAGS) -c $(BOOTDIR)/colors.c -o $(KERNDIR)/colors.o
-	$(LD) $(KLDFLAGS) -o $(BINDIR)/mmurtl64.elf $(KERNDIR)/mmkernel.o $(KERNDIR)/colors.o
+	$(LD) $(KLDFLAGS) -o $(BINDIR)/mmurtl64.elf $(KERNDIR)/mmkernel.o $(KERNDIR)/colors.o -lGGI
 	rm $(KERNDIR)/mmkernel.o $(KERNDIR)/colors.o
 
-buildfloppy: buildstdlib buildboot buildkernel
+buildfloppy: buildstdlib buildgraphlib buildboot buildkernel
 	@ echo Building disk image...
 	dd if=/dev/zero of=ProjectGuardian.img bs=512 count=2880
 	mformat -i ProjectGuardian.img -f 1440 ::
