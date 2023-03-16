@@ -30,8 +30,9 @@ buildstdlib:
 buildgraphlib:
 	@ echo Building graphics library...
 	$(CC) $(CFLAGS) -c $(GRLIBDIR)/putpixel.c -o $(GRLIBDIR)/putpixel.o
-	$(AR) $(ARFLAGS) lib/libGGI.a $(GRLIBDIR)/putpixel.o
-	rm $(GRLIBDIR)/putpixel.o
+	$(CC) $(CFLAGS) -c $(GRLIBDIR)/outtext.c -o $(GRLIBDIR)/outtext.o
+	$(AR) $(ARFLAGS) lib/libGGI.a $(GRLIBDIR)/putpixel.o $(GRLIBDIR)/outtext.o
+	rm $(GRLIBDIR)/putpixel.o $(GRLIBDIR)/outtext.o
 
 buildboot:
 	@ echo Building booter...

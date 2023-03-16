@@ -6,6 +6,10 @@
 unsigned int *mytab[8192];
 extern unsigned int colors[];
 mmKernelTable *emktable;
+unsigned char *systemfont;
+unsigned int cp_x, cp_y, ft_w, ft_h;
+unsigned int currcolor;
+unsigned int bgcolor;
 
 int _start(mmKernelTable *mmkerntab)
 {
@@ -34,6 +38,54 @@ int _start(mmKernelTable *mmkerntab)
                 for(unsigned long int z = 0; z < 4; z++)
                         for(y = 500; y < 600; y++)
 				putpixel(x+z, y, 255-(x/4));
+
+	// Try outtext and outtextxy
+	// With 8x8 font and 8x16 font
+	ft_w = 8;
+	ft_h = 8;
+	cp_x = 300;
+	cp_y = 600;
+	systemfont = sysfont_8x8;
+	currcolor = RED;
+	bgcolor = BLACK;
+	outtext("Project Guardian");
+	currcolor = WHITE;
+	outtextxy(298, 598, "Project Guardian");
+
+	cp_x = 0;
+	cp_y = 616;
+	for(unsigned int count = 0; count < 16; count++)
+	{
+		currcolor = count % 16;
+		if(currcolor == WHITE)
+			bgcolor = BLACK;
+		else
+			bgcolor = (count + 1) % 16;
+		outtext("Project Guardian ");
+	}
+
+	cp_x = 300;
+	cp_y = 650;
+	ft_h = 16;
+	systemfont = sysfont_8x16;
+	currcolor = BLUE;
+	outtext("Project Guardian");
+	currcolor = WHITE;
+	outtextxy(298, 648, "Project Guardian");
+
+	cp_x = 0;
+	cp_y = 670;
+	for(unsigned int count = 0; count < 50; count++)
+	{
+		currcolor = count % 16;
+		if(currcolor == WHITE)
+			bgcolor = BLACK;
+		else
+			bgcolor = WHITE;
+		outtext("Project Guardian ");
+	}
+
+
 
 	return 0x600DB007;
 }
