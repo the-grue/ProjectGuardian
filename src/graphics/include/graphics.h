@@ -116,5 +116,6 @@ void putpixel(unsigned long int x, unsigned long int y, unsigned int color);
 void outtextxy(unsigned int x, unsigned int y, char *textstring);
 void outtext(char *textstring);
 void line(int x1, int y1, int x2, int y2);
+void rectangle(int left, int top, int right, int bottom);
 
 #endif

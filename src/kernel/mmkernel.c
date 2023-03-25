@@ -100,6 +100,16 @@ int _start(mmKernelTable *mmkerntab)
 	currcolor = RED;
 	line(0, mmkerntab->fb.Height - 1, mmkerntab->fb.Width - 1, 0);
 
+	linesettingstype.thickness = THICK_WIDTH;;
+	currcolor = BLUE;
+	for(int n = 50; n < 200; n += 10)
+		rectangle(n, n, n+50, n+50);
+	linesettingstype.thickness = NORM_WIDTH;
+	currcolor = WHITE;
+	for(int n = 50; n < 200; n += 10)
+		rectangle(n, n, n+50, n+50);
+
+
 
 	return 0x600DB007;
 }

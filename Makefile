@@ -33,9 +33,11 @@ buildgraphlib:
 	$(CC) $(CFLAGS) -c $(GRLIBDIR)/putpixel.c -o $(GRLIBDIR)/putpixel.o
 	$(CC) $(CFLAGS) -c $(GRLIBDIR)/outtext.c -o $(GRLIBDIR)/outtext.o
 	$(CC) $(CFLAGS) -c $(GRLIBDIR)/line.c -o $(GRLIBDIR)/line.o
+	$(CC) $(CFLAGS) -c $(GRLIBDIR)/rectangle.c -o $(GRLIBDIR)/rectangle.o
 	$(AR) $(ARFLAGS) lib/libGGI.a $(GRLIBDIR)/putpixel.o $(GRLIBDIR)/outtext.o
-	$(AR) $(ARFLAGS) lib/libGGI.a $(GRLIBDIR)/line.o
+	$(AR) $(ARFLAGS) lib/libGGI.a $(GRLIBDIR)/line.o $(GRLIBDIR)/rectangle.o
 	rm $(GRLIBDIR)/putpixel.o $(GRLIBDIR)/outtext.o $(GRLIBDIR)/line.o
+	rm $(GRLIBDIR)/rectangle.o
 
 buildboot:
 	@ echo Building booter...
