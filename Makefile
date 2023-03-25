@@ -24,15 +24,18 @@ KLDFLAGS = -T $(KLDSCRIPT) -static -Bsymbolic -nostdlib -Llib
 buildstdlib:
 	@ echo Building stdlib...
 	$(CC) $(CFLAGS) -c $(STDLIBDIR)/memcmp.c -o $(STDLIBDIR)/memcmp.o
-	$(AR) $(ARFLAGS) lib/libstd.a $(STDLIBDIR)/memcmp.o
-	rm $(STDLIBDIR)/memcmp.o
+	$(CC) $(CFLAGS) -c $(STDLIBDIR)/abs.c -o $(STDLIBDIR)/abs.o
+	$(AR) $(ARFLAGS) lib/libstd.a $(STDLIBDIR)/memcmp.o $(STDLIBDIR)/abs.o
+	rm $(STDLIBDIR)/memcmp.o $(STDLIBDIR)/abs.o
 
 buildgraphlib:
 	@ echo Building graphics library...
 	$(CC) $(CFLAGS) -c $(GRLIBDIR)/putpixel.c -o $(GRLIBDIR)/putpixel.o
 	$(CC) $(CFLAGS) -c $(GRLIBDIR)/outtext.c -o $(GRLIBDIR)/outtext.o
+	$(CC) $(CFLAGS) -c $(GRLIBDIR)/line.c -o $(GRLIBDIR)/line.o
 	$(AR) $(ARFLAGS) lib/libGGI.a $(GRLIBDIR)/putpixel.o $(GRLIBDIR)/outtext.o
-	rm $(GRLIBDIR)/putpixel.o $(GRLIBDIR)/outtext.o
+	$(AR) $(ARFLAGS) lib/libGGI.a $(GRLIBDIR)/line.o
+	rm $(GRLIBDIR)/putpixel.o $(GRLIBDIR)/outtext.o $(GRLIBDIR)/line.o
 
 buildboot:
 	@ echo Building booter...
@@ -47,7 +50,7 @@ buildkernel:
 	@ echo Building kernel...
 	$(CC) $(KCFLAGS) -c $(KERNDIR)/mmkernel.c -o $(KERNDIR)/mmkernel.o
 	$(CC) $(KCFLAGS) -c $(BOOTDIR)/colors.c -o $(KERNDIR)/colors.o
-	$(LD) $(KLDFLAGS) -o $(BINDIR)/mmurtl64.elf $(KERNDIR)/mmkernel.o $(KERNDIR)/colors.o -lGGI
+	$(LD) $(KLDFLAGS) -o $(BINDIR)/mmurtl64.elf $(KERNDIR)/mmkernel.o $(KERNDIR)/colors.o -lGGI -lstd
 	rm $(KERNDIR)/mmkernel.o $(KERNDIR)/colors.o
 
 buildfloppy: buildstdlib buildgraphlib buildboot buildkernel

@@ -10,6 +10,8 @@ unsigned char *systemfont;
 unsigned int cp_x, cp_y, ft_w, ft_h;
 unsigned int currcolor;
 unsigned int bgcolor;
+struct linesettingstype linesettingstype;
+unsigned short line_patterns[5] = { 0xFFFF, 0xCCCC, 0xFC78, 0xF8F8, 0xFFFF };
 
 int _start(mmKernelTable *mmkerntab)
 {
@@ -85,6 +87,18 @@ int _start(mmKernelTable *mmkerntab)
 		outtext("Project Guardian ");
 	}
 
+	linesettingstype.linestyle = SOLID_LINE;
+	linesettingstype.upattern = 0;
+	linesettingstype.thickness = THICK_WIDTH;;
+	currcolor = RED;
+	line(0, 0, mmkerntab->fb.Width - 1, mmkerntab->fb.Height - 1);
+	currcolor = YELLOW;
+	line(0, mmkerntab->fb.Height - 1, mmkerntab->fb.Width - 1, 0);
+	linesettingstype.thickness = NORM_WIDTH;
+	currcolor = YELLOW;
+	line(0, 0, mmkerntab->fb.Width - 1, mmkerntab->fb.Height - 1);
+	currcolor = RED;
+	line(0, mmkerntab->fb.Height - 1, mmkerntab->fb.Width - 1, 0);
 
 
 	return 0x600DB007;
