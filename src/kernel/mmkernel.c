@@ -106,9 +106,11 @@ int _start(mmKernelTable *mmkerntab)
 		rectangle(n, n, n+50, n+50);
 	linesettingstype.thickness = NORM_WIDTH;
 	currcolor = WHITE;
-	for(int n = 50; n < 200; n += 10)
+	for(int n = 50, s = 0; n < 200; n += 10, s++)
+	{
+		linesettingstype.linestyle = s % 5;
 		rectangle(n, n, n+50, n+50);
-
+	}
 
 
 	return 0x600DB007;
