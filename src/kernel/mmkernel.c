@@ -10,6 +10,7 @@ unsigned char *systemfont;
 unsigned int cp_x, cp_y, ft_w, ft_h;
 unsigned int currcolor;
 unsigned int bgcolor;
+enum transparent_type trans_type = TRANSPARENT;
 struct linesettingstype linesettingstype;
 unsigned short line_patterns[5] = { 0xFFFF, 0xCCCC, 0xFC78, 0xF8F8, 0xFFFF };
 
@@ -75,6 +76,7 @@ int _start(mmKernelTable *mmkerntab)
 	currcolor = WHITE;
 	outtextxy(298, 648, "Project Guardian");
 
+	trans_type = OPAQUE;
 	cp_x = 0;
 	cp_y = 670;
 	for(unsigned int count = 0; count < 50; count++)

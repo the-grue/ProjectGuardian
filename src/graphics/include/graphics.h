@@ -24,6 +24,11 @@ enum COLORS {
         WHITE
 };
 
+enum transparent_type {
+	TRANSPARENT,
+	OPAQUE
+};
+
 enum fill_patterns {
         EMPTY_FILL,             // Fill with background color
         SOLID_FILL,             // Solid fill

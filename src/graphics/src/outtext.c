@@ -6,6 +6,7 @@ extern unsigned int cp_x, cp_y;
 extern unsigned int ft_w, ft_h;
 extern unsigned int currcolor, bgcolor;
 extern mmKernelTable *emktable;
+extern enum transparent_type trans_type;
 
 void scroll(void);
 
@@ -36,8 +37,9 @@ void outtext(char *textstring)
 			{
 				if(((systemfont[(ch * ft_h) + hi] >> lo) & 0x1) == 1)
 					putpixel(width, height, currcolor);
-				else
-					putpixel(width, height, bgcolor);
+				else 
+					if(trans_type == OPAQUE)
+						putpixel(width, height, bgcolor);
 			}
 		}
 		cp_x = cp_x + ft_w;
