@@ -59,6 +59,7 @@ buildfloppy: buildstdlib buildgraphlib buildboot buildkernel
 	@ echo Building disk image...
 	dd if=/dev/zero of=ProjectGuardian.img bs=512 count=2880
 	mformat -i ProjectGuardian.img -f 1440 ::
+	sfdisk --part-type ProjectGuardian.img 1 ef
 	mmd -i ProjectGuardian.img ::/EFI
 	mmd -i ProjectGuardian.img ::/EFI/BOOT
 	mcopy -i ProjectGuardian.img $(BINDIR)/mmboot64.efi ::/EFI/BOOT
