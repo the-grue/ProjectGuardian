@@ -18,7 +18,7 @@ AR = ar
 
 CFLAGS = -I/usr/include/efi -I/usr/include/efi/x86_64 -Isrc/stdlib/include -Isrc/graphics/include -fpic -ffreestanding -fno-stack-protector -fno-stack-check -fshort-wchar -mno-red-zone -maccumulate-outgoing-args
 ARFLAGS = rcs
-KCFLAGS = -Isrc/stdlib/include -Isrc/graphics/include -ffreestanding -fshort-wchar
+KCFLAGS = -Isrc/stdlib/include -Isrc/graphics/include -I/usr/include/efi -I/usr/include/efi/x86_64 -ffreestanding -fshort-wchar
 KLDFLAGS = -T $(KLDSCRIPT) -static -Bsymbolic -nostdlib -Llib
 
 buildstdlib:

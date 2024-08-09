@@ -4,6 +4,11 @@
 #include <string.h>
 #include <mmkernel.h>
 
+EFI_MEMORY_DESCRIPTOR* Map = NULL;
+UINTN MapSize, MapKey;
+UINTN DescriptorSize;
+UINT32 DescriptorVersion;
+
 mmKernelTable ktable;
 
 EFI_FILE_PROTOCOL* OpenFile(EFI_FILE_PROTOCOL* Volume, CHAR16* Path, EFI_HANDLE ImageHandle)
@@ -199,7 +204,17 @@ EFI_STATUS EFIAPI efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable
 		}
 	}
 
+	uefi_call_wrapper(BS->GetMemoryMap, 5, &MapSize, Map, &MapKey, &DescriptorSize, &DescriptorVersion);
+	uefi_call_wrapper(BS->AllocatePool, 3, EfiLoaderData, MapSize, (void**)&Map);
+	uefi_call_wrapper(BS->GetMemoryMap, 5, &MapSize, Map, &MapKey, &DescriptorSize, &DescriptorVersion);
+
+	ktable.mmap.mMap = Map;
+	ktable.mmap.MapSize = MapSize;
+	ktable.mmap.DescriptorSize = DescriptorSize;
+
 	Print(L"Starting MMURTL-64...\n");
+
+	uefi_call_wrapper(BS->ExitBootServices, 2, ImageHandle, MapKey);
 
 	int(*KernelStart)(mmKernelTable *) = ((__attribute__((sysv_abi)) int (*)(mmKernelTable *) ) header.e_entry);
 
