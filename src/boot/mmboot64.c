@@ -6,6 +6,7 @@
 
 EFI_MEMORY_DESCRIPTOR* Map = NULL;
 UINTN MapSize, MapKey;
+UINTN MemSize = 0;
 UINTN DescriptorSize;
 UINT32 DescriptorVersion;
 
@@ -203,6 +204,35 @@ EFI_STATUS EFIAPI efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable
 			}
 		}
 	}
+
+	/* Get initial memory size and map  */
+
+	uefi_call_wrapper(BS->GetMemoryMap, 5, &MapSize, Map, &MapKey, &DescriptorSize, &DescriptorVersion);
+	uefi_call_wrapper(BS->AllocatePool, 3, EfiLoaderData, MapSize, (void**)&Map);
+	uefi_call_wrapper(BS->GetMemoryMap, 5, &MapSize, Map, &MapKey, &DescriptorSize, &DescriptorVersion);
+
+	/* Calculate MemSize */
+
+	UINTN MapEntries = MapSize / DescriptorSize;
+
+	for(int x = 0; x < MapEntries; x++)
+	{
+		EFI_MEMORY_DESCRIPTOR *descriptor = (EFI_MEMORY_DESCRIPTOR *)((UINTN)Map + (x * DescriptorSize));
+
+		if(descriptor->Type != EfiReservedMemoryType)
+			MemSize = MemSize + (descriptor->NumberOfPages);
+	}
+
+	/* Free previous map, then get space for Page Allocation Map (PAM)  */
+
+	uefi_call_wrapper(BS->FreePool, 1, (void *)&Map);
+	Map = NULL;
+
+	uefi_call_wrapper(BS->AllocatePool, 3, EfiLoaderData, MemSize / 4096 / 8, (void**)&ktable.PAM);
+
+	Print(L"PAM address %llx\n", ktable.PAM);
+
+	/* Now, get final memory size and map to pass to kernel  */
 
 	uefi_call_wrapper(BS->GetMemoryMap, 5, &MapSize, Map, &MapKey, &DescriptorSize, &DescriptorVersion);
 	uefi_call_wrapper(BS->AllocatePool, 3, EfiLoaderData, MapSize, (void**)&Map);

@@ -26,6 +26,7 @@ typedef struct {
 typedef struct {
 	framebuffer fb;
 	memmap mmap;
+	char *PAM;
 	unsigned int *yarray;
 } mmKernelTable;
 
