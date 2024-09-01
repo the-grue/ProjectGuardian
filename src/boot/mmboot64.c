@@ -250,5 +250,7 @@ EFI_STATUS EFIAPI efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable
 
 	Print(L"%X rules!\n", KernelStart(&ktable));
 
+	while(1);
+
 	return EFI_SUCCESS;
 }

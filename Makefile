@@ -63,6 +63,7 @@ buildfloppy: buildstdlib buildgraphlib buildboot buildkernel
 	mmd -i ProjectGuardian.img ::/EFI
 	mmd -i ProjectGuardian.img ::/EFI/BOOT
 	mcopy -i ProjectGuardian.img $(BINDIR)/mmboot64.efi ::/EFI/BOOT
+	mcopy -i ProjectGuardian.img $(BINDIR)/mmboot64.efi ::/EFI/BOOT/BOOTX64.EFI
 	mcopy -i ProjectGuardian.img $(EFIDIR)/startup.nsh ::
 	mcopy -i ProjectGuardian.img $(BINDIR)/mmurtl64.elf ::
 
