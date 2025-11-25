@@ -1,7 +1,7 @@
 #ifndef _MMKERNEL
 #define _MMKERNEL
 
-#include <efi.h>
+#include <efi/efi.h>
 
 #ifndef _SIZET
 #define _SIZET
